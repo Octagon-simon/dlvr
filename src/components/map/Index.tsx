@@ -1,79 +1,96 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Box, Button, HStack, Text } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 import { FaEnvelope, FaMapPin } from 'react-icons/fa6';
 import { BsFillPhoneFill } from 'react-icons/bs';
+import axios from 'axios';
+import { CompanyDTO } from '@/types';
 
-type Company = {
-  id: number;
-  name: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-  whatsapp: string;
-  email?: string;
-};
-
-const companies: Company[] = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const demoCompanies: CompanyDTO[] = [
   {
-    id: 1,
-    name: "Express Logistics Ltd",
-    location: { lat: 6.5532932, lng: 3.3370028 },
-    whatsapp: "+1234567890",
+    companyName: "Express Logistics Ltd",
+    locationObject: { lat: 6.5532932, lng: 3.3370028 },
+    whatsapp: "+2349128873664",
     email: "contact@logisticsone.com",
+    formattedAddress: "123 Main St, Logistics One, Lagos, Nigeria"
   },
   {
-    id: 2,
-    name: "QuickShip Co.",
-    location: { lat: 6.6099615, lng: 3.3953873 },
-    whatsapp: "+0987654321",
-    email:  'support@quickship.co'
+    companyName: "QuickShip Co.",
+    locationObject: { lat: 6.6099615, lng: 3.3953873 },
+    whatsapp: "+2348126635447",
+    email: 'support@quickship.co',
+    formattedAddress: "456 Elm St, QuickShip Co., Lagos, Nigeria"
   },
   {
-    id: 3,
-    name: "FreightPro Services",
-    location: { lat: 6.578996999999999, lng: 3.3494666 },
-    whatsapp: "+1122334455",
+    companyName: "FreightPro Services",
+    locationObject: { lat: 6.578996999999999, lng: 3.3494666 },
+    whatsapp: "+2348163345226",
     email: "info@freightpro.com",
+    formattedAddress: "789 Oak St, FreightPro Services, Lagos, Nigeria"
   },
 ];
 
 export default function LogisticsMap() {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const [companies, setCompanies] = useState<CompanyDTO[]>([]);
 
   useEffect(() => {
-    if (!mapRef.current && mapContainerRef.current) {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get('api/companies/get-all')
 
-      mapRef.current = L.map(mapContainerRef.current).setView([companies[0]?.location?.lat, companies[0]?.location?.lng], 5);
+        if (response?.data && Object.keys(response.data?.data).length) {
+          const responseData = response.data.data as CompanyDTO[]
+          setCompanies(responseData)
+        } else {
+          setCompanies(demoCompanies);
+        }
+
+      } catch (e) {
+        console.error(e);
+        setCompanies(demoCompanies);
+      }
+    }
+
+    fetchCompanies()
+  }, [])
+
+
+  useEffect(() => {
+
+    if (!mapRef.current && mapContainerRef.current && companies?.length > 0) {
+
+      mapRef.current = L.map(mapContainerRef.current).setView([companies[0]?.locationObject?.lat, companies[0]?.locationObject?.lng], 5);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(mapRef.current);
 
       companies.forEach((company) => {
-        const marker = L.marker([company.location.lat, company.location.lng]).addTo(mapRef.current!);
+        const marker = L.marker([company.locationObject.lat, company.locationObject.lng]).addTo(mapRef.current!);
 
         const popupContent = document.createElement('div');
 
         createRoot(popupContent).render(
           <Box>
-            <Text fontSize='16px' mb={5} fontWeight={"800"}>{company.name}</Text>
+            <Text fontSize='16px' mb={5} fontWeight={"800"}>{company.companyName}</Text>
             <HStack fontSize="15px" mb={1}>
-              <FaMapPin /> <Text m={0}>No 1 Egbulegbu</Text>
+              <FaMapPin /> <Text m={0}>{company.formattedAddress}</Text>
             </HStack>
             <HStack fontSize="15px" mb={1}>
               <BsFillPhoneFill /> <Text>{company.whatsapp}</Text>
             </HStack>
-            <HStack fontSize="15px" mb={1}>
-              <FaEnvelope /> <Text>{company.email}</Text>
-            </HStack>
-
+            {(company?.email) ?
+              <HStack fontSize="15px" mb={1}>
+                <FaEnvelope /> <Text>{company.email}</Text>
+              </HStack>
+              : null}
             <Button w={"full"} colorScheme='teal'>
               Book Now
             </Button>
@@ -90,7 +107,7 @@ export default function LogisticsMap() {
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [companies]);
 
   return <div suppressHydrationWarning={true} ref={mapContainerRef} style={{ height: '100vh', width: '100%' }} />;
 }
