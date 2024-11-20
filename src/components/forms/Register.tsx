@@ -1,36 +1,32 @@
 'use client'
 
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Text, Toast } from "@chakra-ui/react"
+import { libraries } from "@/constants"
+import { CompanyDTO } from "@/types"
+import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Text, useToast } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
-import { ChangeEvent, useCallback, useState } from "react"
+import axios from "axios"
+import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
+import AlertBox from "../common/AlertBox"
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
     process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const libraries: 'places'[] = ['places']
-
-export interface LocationObject {
-    formatted_address?: string
-    geometry?: {
-        location?: {
-            lat: number
-            lng: number
-        }
-    }
-    [key: string]: unknown
-}
-
 const Registration = () => {
 
+    const toast = useToast()
+
     const [locationText, setLocationText] = useState("")
-    const [locationObject, setLocationObject] = useState<LocationObject>()
-
-    console.log(locationObject)
-
-    const [formData, setFormData] = useState({
+    const [loading, setLoading] = useState(false)
+    const [hasRegistered, setHasRegistered] = useState(false)
+    const [formData, setFormData] = useState<CompanyDTO>({
         companyName: '',
         whatsapp: '',
-        email: ''
+        email: '',
+        locationObject: {
+            lat: 0,
+            lng: 0,
+        },
+        formattedAddress: '',
     })
 
     const [formErrors, setFormErrors] = useState<{
@@ -57,7 +53,7 @@ const Registration = () => {
     const handlePlaceChanged = useCallback(() => {
         if (autocomplete) {
             const place = autocomplete.getPlace()
-            const locationObject: LocationObject = {
+            const locationObject = {
                 formatted_address: place.formatted_address,
                 geometry: place.geometry
                     ? {
@@ -68,11 +64,19 @@ const Registration = () => {
                     }
                     : undefined,
             }
-            const locationText = locationObject.formatted_address || ''
-            setLocationText(locationText)
-            setLocationObject(locationObject)
+
+            setFormData({
+                ...formData,
+                formattedAddress: locationObject.formatted_address || '',
+                locationObject: {
+                    lat: locationObject.geometry?.location?.lat ?? 0,
+                    lng: locationObject.geometry?.location?.lng ?? 0,
+                }
+            })
+
+            setLocationText(locationObject.formatted_address || '')
         }
-    }, [autocomplete])
+    }, [autocomplete, formData])
 
 
     if (!isLoaded) {
@@ -85,30 +89,60 @@ const Registration = () => {
         setFormData({ ...formData, [e.currentTarget.id]: e.currentTarget.value })
     }
 
-    const handleContinue = () => {
+    const handleContinue = async (e: FormEvent) => {
         try {
+            e.preventDefault()
+
+            setLoading(true)
+
             if (formData?.companyName?.trim() === '') {
                 setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
+                setLoading(false)
                 return
             }
+
+            if (formData?.formattedAddress?.trim() === '') {
+                setFormErrors({ ...formErrors, address: 'Location is required' })
+                setLoading(false)
+                return
+            }
+
             if (formData?.whatsapp?.trim() === '') {
                 setFormErrors({ ...formErrors, whatsapp: 'WhatsApp number is required' })
+                setLoading(false)
                 return
             }
-            if (formData?.email?.trim() === '' || !formData?.email?.includes('@')) {
+
+            //email is optional
+            if (formData?.email?.trim() !== '' && !formData?.email?.includes('@')) {
                 setFormErrors({ ...formErrors, email: 'Email is required and should contain a valid domain' })
+                setLoading(false)
                 return
             }
 
+            //reset form Errors
+            setFormErrors({})
 
+            await axios.post('api/companies/new', formData)
+
+            toast({
+                title: "Success",
+                description: "Registration Successful",
+                status: "success",
+                duration: 3000,
+            })
+
+            setHasRegistered(true)
+            setLoading(false)
         } catch (e) {
-            console.error(e)
-            Toast({
+            console.error("Error here", e)
+            toast({
                 title: "Error",
-                description: "Failed to continue with registration",
+                description: "Registration Failed",
                 status: "error",
                 duration: 3000,
             })
+            setLoading(false)
         }
     }
 
@@ -119,7 +153,12 @@ const Registration = () => {
             p={10}
             minHeight={"100%"}
         >
-
+            {(hasRegistered) ?
+                <Box mb={5}>
+                    <AlertBox message="Registration Successful! Please refresh this page to get an updated map" />
+                </Box>
+                : null}
+                
             <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register Company</Text>
 
             <FormControl
@@ -161,6 +200,7 @@ const Registration = () => {
                         placeholder="Oshodi ....."
                         value={locationText}
                         onChange={(e) => setLocationText(e.target.value)}
+                        autoComplete="off"
                     />
                 </Autocomplete>
                 <FormErrorMessage>
@@ -189,7 +229,6 @@ const Registration = () => {
 
             <FormControl
                 mb={8}
-                isRequired
                 isInvalid={typeof formErrors?.email !== 'undefined'}
             >
                 <FormLabel>
@@ -206,7 +245,7 @@ const Registration = () => {
                 </FormErrorMessage>
             </FormControl>
 
-            <Button onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
+            <Button isLoading={loading} disabled={loading} onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
         </Box>
     )
 }
