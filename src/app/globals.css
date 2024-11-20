@@ -35,6 +35,21 @@ a {
   text-decoration: none;
 }
 
+.leaflet-popup-content p{
+  margin: 8px 0 !important;
+}
+
+.leaflet-popup-content button {
+  margin-top: 10px;
+  padding: 10px;
+  width: 100%;
+  text-align: center;
+  background-color: #38A169;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
