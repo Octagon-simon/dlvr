@@ -2,7 +2,7 @@
 
 import { libraries } from "@/constants"
 import { CompanyDTO } from "@/types"
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Text, useToast } from "@chakra-ui/react"
+import { Box, Button, Flex, FormErrorMessage, Input, Link, useToast, FormControl, FormLabel, Text, } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
 import axios from "axios"
 import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
@@ -11,18 +11,18 @@ import AlertBox from "../common/AlertBox"
 const GOOGLE_PLACES_API_KEY: string | undefined =
     process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const Registration = () => {
+const RegisterCompany = () => {
 
     const toast = useToast()
 
     const [locationText, setLocationText] = useState("")
     const [loading, setLoading] = useState(false)
     const [hasRegistered, setHasRegistered] = useState(false)
-    const [formData, setFormData] = useState<CompanyDTO>({
+    const [formData, setFormData] = useState<Omit<CompanyDTO, 'id' | 'createdAt'>>({
         companyName: '',
         whatsapp: '',
         email: '',
-        locationObject: {
+        location: {
             lat: 0,
             lng: 0,
         },
@@ -50,6 +50,38 @@ const Registration = () => {
         [],
     )
 
+    const ValidateForm = (): Boolean => {
+        if (formData?.companyName?.trim() === '') {
+            setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.formattedAddress?.trim() === '') {
+            setFormErrors({ ...formErrors, address: 'Location is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.whatsapp?.trim() === '') {
+            setFormErrors({ ...formErrors, whatsapp: 'WhatsApp number is required' })
+            setLoading(false)
+            return false
+        }
+
+        //email is optional
+        if (formData?.email?.trim() !== '' && !formData?.email?.includes('@')) {
+            setFormErrors({ ...formErrors, email: 'Email is required and should contain a valid domain' })
+            setLoading(false)
+            return false
+        }
+
+        //reset form Errors
+        setFormErrors({})
+
+        return true
+    }
+
     const handlePlaceChanged = useCallback(() => {
         if (autocomplete) {
             const place = autocomplete.getPlace()
@@ -68,7 +100,7 @@ const Registration = () => {
             setFormData({
                 ...formData,
                 formattedAddress: locationObject.formatted_address || '',
-                locationObject: {
+                location: {
                     lat: locationObject.geometry?.location?.lat ?? 0,
                     lng: locationObject.geometry?.location?.lng ?? 0,
                 }
@@ -95,35 +127,9 @@ const Registration = () => {
 
             setLoading(true)
 
-            if (formData?.companyName?.trim() === '') {
-                setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
-                setLoading(false)
-                return
-            }
+            if (ValidateForm() === false) return
 
-            if (formData?.formattedAddress?.trim() === '') {
-                setFormErrors({ ...formErrors, address: 'Location is required' })
-                setLoading(false)
-                return
-            }
-
-            if (formData?.whatsapp?.trim() === '') {
-                setFormErrors({ ...formErrors, whatsapp: 'WhatsApp number is required' })
-                setLoading(false)
-                return
-            }
-
-            //email is optional
-            if (formData?.email?.trim() !== '' && !formData?.email?.includes('@')) {
-                setFormErrors({ ...formErrors, email: 'Email is required and should contain a valid domain' })
-                setLoading(false)
-                return
-            }
-
-            //reset form Errors
-            setFormErrors({})
-
-            await axios.post('api/companies/new', formData)
+            await axios.post('api/companies/register', formData)
 
             toast({
                 title: "Success",
@@ -158,8 +164,8 @@ const Registration = () => {
                     <AlertBox message="Registration Successful! Please refresh this page to get an updated map" />
                 </Box>
                 : null}
-                
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register Company</Text>
+
+            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register As a Company</Text>
 
             <FormControl
                 mb={3}
@@ -208,6 +214,35 @@ const Registration = () => {
                 </FormErrorMessage>
 
             </FormControl>
+
+            <FormControl
+                mb={3}
+                isRequired
+                isInvalid={typeof formErrors?.address !== 'undefined'}
+            >
+                <FormLabel>
+                    Address
+                </FormLabel>
+
+                <Autocomplete
+                    onLoad={handleLoad}
+                    onPlaceChanged={handlePlaceChanged}
+                >
+                    <Input
+                        id="address"
+                        type="text"
+                        placeholder="Oshodi ....."
+                        value={locationText}
+                        onChange={(e) => setLocationText(e.target.value)}
+                        autoComplete="off"
+                    />
+                </Autocomplete>
+                <FormErrorMessage>
+                    {formErrors?.address}
+                </FormErrorMessage>
+
+            </FormControl>
+
             <FormControl
                 mb={3}
                 isRequired
@@ -246,8 +281,14 @@ const Registration = () => {
             </FormControl>
 
             <Button isLoading={loading} disabled={loading} onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
+            <Flex flexDir={"column"} mt={5}>
+                <Text>You&apos;re registering as a Logistics company. </Text>
+                <Link color={"blue"} href="/dispatch-rider">
+                    Click here to register as a dispatch rider instead
+                </Link>
+            </Flex>
         </Box>
     )
 }
 
-export default Registration
+export default RegisterCompany;
