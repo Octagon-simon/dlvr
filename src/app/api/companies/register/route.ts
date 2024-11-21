@@ -27,6 +27,7 @@ export async function POST(req: CustomRequest) {
             whatsapp,
             formattedAddress,
             email: email || null,
+            createdAt: Date.now()
         });
 
         return NextResponse.json(

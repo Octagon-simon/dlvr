@@ -4,11 +4,13 @@ type GeoPoint = {
 }
 
 export interface CompanyDTO {
+    id: string;
     companyName: string;
     location: GeoPoint;
     whatsapp: string;
     email?: string;
     formattedAddress: string;
+    createdAt: number;
 }
 
 export interface DispatchRiderDTO{
@@ -18,12 +20,18 @@ export interface DispatchRiderDTO{
     location: GeoPoint;
     isAvailable: boolean;
     formattedAddress: string;
+    createdAt: number;
+    whatsapp: string;
 }
 
 export interface OrderDTO{
     id: string;
+    name: string;
+    whatsapp: string;
     orderLocation: GeoPoint;
     details: string;
     assignedRiderId?: string;
     status: "pending" | "assigned" | "completed";
+    createdAt: number;
+    formattedAddress: string;
 }

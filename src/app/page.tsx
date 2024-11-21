@@ -1,6 +1,6 @@
 
 import RegisterCompany from '@/components/forms/RegisterCompany';
-import LeafletMap from '@/components/map/Index';
+import LogisticsMap from '@/components/map/LogisticsMap';
 import { Box, Flex } from '@chakra-ui/react';
 
 export default function Page() {
@@ -12,7 +12,7 @@ export default function Page() {
       </Box>
       <Box flex="2">
         <Box id="map" border="1px solid #bbb" p={5} backgroundColor={"#ccc"}>
-          <LeafletMap />
+          <LogisticsMap />
         </Box>
       </Box>
     </Flex>

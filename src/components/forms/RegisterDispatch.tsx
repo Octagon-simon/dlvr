@@ -15,13 +15,12 @@ const GOOGLE_PLACES_API_KEY: string | undefined =
 const RegisterDispatch = () => {
 
     const toast = useToast()
-    const { loading, companies } = useCompanies()
+    const { loading: loadingCompanies, companies } = useCompanies()
 
     const [locationText, setLocationText] = useState("")
     const [loading, setLoading] = useState(false)
     const [hasRegistered, setHasRegistered] = useState(false)
-    const [formData, setFormData] = useState<DispatchRiderDTO>({
-        id: "",
+    const [formData, setFormData] = useState<Omit<DispatchRiderDTO, 'id' | 'createdAt'>>({
         companyId: "",
         name: "",
         formattedAddress: "",
@@ -29,14 +28,16 @@ const RegisterDispatch = () => {
             lat: 0,
             lng: 0,
         },
-        isAvailable: false
+        isAvailable: false,
+        whatsapp: ''
     })
 
     const [formErrors, setFormErrors] = useState<{
         id?: string,
         companyId?: string,
         name?: string,
-        address?: string
+        address?: string,
+        whatsapp?: string
     }>({})
 
     const { isLoaded } = useJsApiLoader({
@@ -116,6 +117,12 @@ const RegisterDispatch = () => {
                 return
             }
 
+            if (formData?.whatsapp?.trim() === '') {
+                setFormErrors({ ...formErrors, whatsapp: 'Your whatsapp number is required' })
+                setLoading(false)
+                return
+            }
+
             //reset form Errors
             setFormErrors({})
 
@@ -155,7 +162,7 @@ const RegisterDispatch = () => {
                 </Box>
                 : null}
 
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register Disptach Rider</Text>
+            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register As a Disptach Rider</Text>
 
             <FormControl
                 mb={3}
@@ -177,8 +184,27 @@ const RegisterDispatch = () => {
                 </FormErrorMessage>
             </FormControl>
 
+            <FormControl
+                mb={3}
+                isRequired
+                isInvalid={typeof formErrors?.whatsapp !== 'undefined'}
 
-            {(loading) ? <Spinner /> :
+            >
+                <FormLabel>
+                    Your Whatsapp Number
+                </FormLabel>
+                <Input
+                    id="name"
+                    onChange={handleChange}
+                    value={formData?.whatsapp}
+                    placeholder="081xxxxxxxx"
+                />
+                <FormErrorMessage>
+                    {formErrors?.whatsapp}
+                </FormErrorMessage>
+            </FormControl>
+
+            {(loadingCompanies) ? <Spinner /> :
                 <FormControl
                     mb={3}
                     isRequired
@@ -194,7 +220,13 @@ const RegisterDispatch = () => {
                         placeholder="Select company"
                         defaultValue={formData?.companyId}
                     >
-                        {/* {(companies)} */}
+                        {(companies).map((data, ind) => {
+                            return (
+                                <option key={ind} value={data.id}>
+                                    {data.companyName}
+                                </option>
+                            )
+                        })}
                     </Select>
                 </FormControl>
             }

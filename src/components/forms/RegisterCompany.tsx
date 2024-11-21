@@ -2,7 +2,7 @@
 
 import { libraries } from "@/constants"
 import { CompanyDTO } from "@/types"
-import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Link, Text, useToast, } from "@chakra-ui/react"
+import { Box, Button, Flex, FormErrorMessage, Input, Link, useToast, FormControl, FormLabel, Text, } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
 import axios from "axios"
 import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
@@ -18,7 +18,7 @@ const RegisterCompany = () => {
     const [locationText, setLocationText] = useState("")
     const [loading, setLoading] = useState(false)
     const [hasRegistered, setHasRegistered] = useState(false)
-    const [formData, setFormData] = useState<CompanyDTO>({
+    const [formData, setFormData] = useState<Omit<CompanyDTO, 'id' | 'createdAt'>>({
         companyName: '',
         whatsapp: '',
         email: '',
@@ -159,7 +159,7 @@ const RegisterCompany = () => {
                 </Box>
                 : null}
 
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register Company</Text>
+            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register As a Company</Text>
 
             <FormControl
                 mb={3}

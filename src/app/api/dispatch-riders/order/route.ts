@@ -6,6 +6,13 @@ import { distanceBetween } from 'geofire-common';
 interface CustomRequest extends Request {
     json(): Promise<OrderDTO>;
 }
+// id: string;
+// orderLocation: GeoPoint;
+// details: string;
+// assignedRiderId?: string;
+// status: "pending" | "assigned" | "completed";
+// createdAt: number;
+// formattedAddress: string;
 
 export async function POST(req: CustomRequest) {
     try {
