@@ -1,38 +1,41 @@
 'use client'
 
 import { libraries } from "@/constants"
-import { CompanyDTO } from "@/types"
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Text, useToast } from "@chakra-ui/react"
+import { DispatchRiderDTO } from "@/types"
+import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Link, Select, Spinner, Text, useToast, } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
 import axios from "axios"
 import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
 import AlertBox from "../common/AlertBox"
+import { useCompanies } from "@/hooks/useCompanies"
 
 const GOOGLE_PLACES_API_KEY: string | undefined =
     process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
-const Registration = () => {
+const RegisterDispatch = () => {
 
     const toast = useToast()
+    const { loading, companies } = useCompanies()
 
     const [locationText, setLocationText] = useState("")
     const [loading, setLoading] = useState(false)
     const [hasRegistered, setHasRegistered] = useState(false)
-    const [formData, setFormData] = useState<CompanyDTO>({
-        companyName: '',
-        whatsapp: '',
-        email: '',
-        locationObject: {
+    const [formData, setFormData] = useState<DispatchRiderDTO>({
+        id: "",
+        companyId: "",
+        name: "",
+        formattedAddress: "",
+        location: {
             lat: 0,
             lng: 0,
         },
-        formattedAddress: '',
+        isAvailable: false
     })
 
     const [formErrors, setFormErrors] = useState<{
-        companyName?: string,
-        whatsapp?: string,
-        email?: string,
+        id?: string,
+        companyId?: string,
+        name?: string,
         address?: string
     }>({})
 
@@ -68,7 +71,7 @@ const Registration = () => {
             setFormData({
                 ...formData,
                 formattedAddress: locationObject.formatted_address || '',
-                locationObject: {
+                location: {
                     lat: locationObject.geometry?.location?.lat ?? 0,
                     lng: locationObject.geometry?.location?.lng ?? 0,
                 }
@@ -83,7 +86,7 @@ const Registration = () => {
         return <div>Loading...</div>
     }
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         e.preventDefault()
 
         setFormData({ ...formData, [e.currentTarget.id]: e.currentTarget.value })
@@ -95,8 +98,14 @@ const Registration = () => {
 
             setLoading(true)
 
-            if (formData?.companyName?.trim() === '') {
-                setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
+            if (formData?.name?.trim() === '') {
+                setFormErrors({ ...formErrors, name: 'Your Name is required' })
+                setLoading(false)
+                return
+            }
+
+            if (formData?.companyId?.trim() === '') {
+                setFormErrors({ ...formErrors, companyId: 'Company Name is required' })
                 setLoading(false)
                 return
             }
@@ -107,23 +116,10 @@ const Registration = () => {
                 return
             }
 
-            if (formData?.whatsapp?.trim() === '') {
-                setFormErrors({ ...formErrors, whatsapp: 'WhatsApp number is required' })
-                setLoading(false)
-                return
-            }
-
-            //email is optional
-            if (formData?.email?.trim() !== '' && !formData?.email?.includes('@')) {
-                setFormErrors({ ...formErrors, email: 'Email is required and should contain a valid domain' })
-                setLoading(false)
-                return
-            }
-
             //reset form Errors
             setFormErrors({})
 
-            await axios.post('api/companies/new', formData)
+            await axios.post('api/dispatch-riders/register', formData)
 
             toast({
                 title: "Success",
@@ -158,28 +154,50 @@ const Registration = () => {
                     <AlertBox message="Registration Successful! Please refresh this page to get an updated map" />
                 </Box>
                 : null}
-                
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register Company</Text>
+
+            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register Disptach Rider</Text>
 
             <FormControl
                 mb={3}
                 isRequired
-                isInvalid={typeof formErrors?.companyName !== 'undefined'}
+                isInvalid={typeof formErrors?.name !== 'undefined'}
 
             >
                 <FormLabel>
-                    Company Name
+                    Your Name
                 </FormLabel>
                 <Input
-                    id="companyName"
+                    id="name"
                     onChange={handleChange}
-                    value={formData?.companyName}
-                    placeholder="DLVR..."
+                    value={formData?.name}
+                    placeholder="Simon Ugorji"
                 />
                 <FormErrorMessage>
-                    {formErrors?.companyName}
+                    {formErrors?.name}
                 </FormErrorMessage>
             </FormControl>
+
+
+            {(loading) ? <Spinner /> :
+                <FormControl
+                    mb={3}
+                    isRequired
+                    isInvalid={typeof formErrors?.companyId !== 'undefined'}
+
+                >
+                    <FormLabel requiredIndicator={null} htmlFor="payment_type">
+                        Select company
+                    </FormLabel>
+                    <Select
+                        id="companyId"
+                        onChange={handleChange}
+                        placeholder="Select company"
+                        defaultValue={formData?.companyId}
+                    >
+                        {/* {(companies)} */}
+                    </Select>
+                </FormControl>
+            }
 
             <FormControl
                 mb={3}
@@ -208,46 +226,16 @@ const Registration = () => {
                 </FormErrorMessage>
 
             </FormControl>
-            <FormControl
-                mb={3}
-                isRequired
-                isInvalid={typeof formErrors?.whatsapp !== 'undefined'}
-            >
-                <FormLabel>
-                    Whatsapp Number
-                </FormLabel>
-                <Input
-                    id="whatsapp"
-                    onChange={handleChange}
-                    value={formData?.whatsapp}
-                    placeholder="081xxxxxxxx"
-                />
-                <FormErrorMessage>
-                    {formErrors?.whatsapp}
-                </FormErrorMessage>
-            </FormControl>
-
-            <FormControl
-                mb={8}
-                isInvalid={typeof formErrors?.email !== 'undefined'}
-            >
-                <FormLabel>
-                    Email Address
-                </FormLabel>
-                <Input
-                    id="email"
-                    onChange={handleChange}
-                    value={formData?.email}
-                    placeholder="me@dlvr.com"
-                />
-                <FormErrorMessage>
-                    {formErrors?.email}
-                </FormErrorMessage>
-            </FormControl>
 
             <Button isLoading={loading} disabled={loading} onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
+            <Flex flexDir={"column"} mt={5}>
+                <Text>You&apos;re registering as a Disptach Rider. </Text>
+                <Link color={"blue"} href="/">
+                    Click here to register as a Logistics Company instead
+                </Link>
+            </Flex>
         </Box>
     )
 }
 
-export default Registration
+export default RegisterDispatch

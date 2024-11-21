@@ -1,15 +1,20 @@
 import { db } from '@/firebase'; 
+import { CompanyDTO } from '@/types';
 import { collection, addDoc } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
+interface CustomRequest extends Request{
+    json(): Promise<CompanyDTO>;
+}
+
+export async function POST(req: CustomRequest) {
     try {
         const body = await req.json(); // Parse the request body
 
         // Validate the input
-        const { companyName, locationObject, whatsapp, email, formattedAddress } = body;
+        const { companyName, location, whatsapp, email, formattedAddress } = body;
 
-        if (!companyName || !locationObject || !whatsapp) {
+        if (!companyName || !location || !whatsapp) {
             return NextResponse.json(
                 { error: 'Missing required fields: name, location, or whatsapp' },
                 { status: 400 }
@@ -18,7 +23,7 @@ export async function POST(req: Request) {
 
         const docRef = await addDoc(collection(db, 'companies'), {
             companyName,
-            locationObject,
+            location,
             whatsapp,
             formattedAddress,
             email: email || null,
