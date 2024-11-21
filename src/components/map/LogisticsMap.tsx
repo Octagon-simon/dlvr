@@ -3,13 +3,28 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Box, Button, HStack, Text, useDisclosure} from '@chakra-ui/react';
+import { Box, Button, HStack, Text, useDisclosure } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 import { FaEnvelope, FaMapPin } from 'react-icons/fa6';
 import { BsBicycle, BsFillPhoneFill, BsHouse } from 'react-icons/bs';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useRiders } from '@/hooks/useRiders';
 import { BookRider } from '../riders/BookRider';
+import { CompanyDTO } from '@/types';
+
+const riderIcon = L.icon({
+  iconUrl: '/dispatch.png',
+  iconSize: [80, 80],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
+
+const companyIcon = L.icon({
+  iconUrl: '/delivery-truck.svg',
+  iconSize: [80, 80],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
 
 export default function LogisticsMap() {
   const mapRef = useRef<L.Map | null>(null);
@@ -18,7 +33,7 @@ export default function LogisticsMap() {
   const { loading: loadingCompanies, companies } = useCompanies()
   const { loading: loadingRiders, riders } = useRiders()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [currentCompany, setCurrentCompany] = useState("")
+  const [currentCompany, setCurrentCompany] = useState<CompanyDTO>()
 
   const getCompanyName = (companyId: string) => companies?.find((company) => company.id === companyId)?.companyName || "Unknown company"
 
@@ -33,7 +48,9 @@ export default function LogisticsMap() {
       }).addTo(mapRef.current);
 
       companies.forEach((company) => {
-        const marker = L.marker([company.location.lat, company.location.lng]).addTo(mapRef.current!);
+        const marker = L.marker([company.location.lat, company.location.lng], {
+          icon: companyIcon,
+        }).addTo(mapRef.current!);
 
         const popupContent = document.createElement('div');
 
@@ -52,7 +69,7 @@ export default function LogisticsMap() {
               </HStack>
               : null}
             <Button w={"full"} onClick={() => {
-              setCurrentCompany(company.companyName);
+              setCurrentCompany(company);
               onOpen();
             }} colorScheme='teal'>
               Book Now
@@ -64,7 +81,11 @@ export default function LogisticsMap() {
       });
 
       riders.forEach((rider) => {
-        const marker = L.marker([rider.location.lat, rider.location.lng]).addTo(mapRef.current!);
+        // const marker = L.marker([rider.location.lat, rider.location.lng]).addTo(mapRef.current!);
+        const marker = L.marker([rider.location.lat, rider.location.lng], {
+          icon: riderIcon,
+        }).addTo(mapRef.current!);
+
         const companyName = getCompanyName(rider.companyId);
         const popupContent = document.createElement('div');
 
@@ -98,7 +119,7 @@ export default function LogisticsMap() {
   return (
     <>
       <div suppressHydrationWarning={true} ref={mapContainerRef} style={{ height: '100vh', width: '100%' }} />
-      <BookRider companyName={currentCompany} isOpen={isOpen} onClose={onClose} />
+      <BookRider company={currentCompany} isOpen={isOpen} onClose={onClose} />
     </>
   )
 }

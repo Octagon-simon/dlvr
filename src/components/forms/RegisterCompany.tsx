@@ -50,6 +50,38 @@ const RegisterCompany = () => {
         [],
     )
 
+    const ValidateForm = (): Boolean => {
+        if (formData?.companyName?.trim() === '') {
+            setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.formattedAddress?.trim() === '') {
+            setFormErrors({ ...formErrors, address: 'Location is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.whatsapp?.trim() === '') {
+            setFormErrors({ ...formErrors, whatsapp: 'WhatsApp number is required' })
+            setLoading(false)
+            return false
+        }
+
+        //email is optional
+        if (formData?.email?.trim() !== '' && !formData?.email?.includes('@')) {
+            setFormErrors({ ...formErrors, email: 'Email is required and should contain a valid domain' })
+            setLoading(false)
+            return false
+        }
+
+        //reset form Errors
+        setFormErrors({})
+
+        return true
+    }
+
     const handlePlaceChanged = useCallback(() => {
         if (autocomplete) {
             const place = autocomplete.getPlace()
@@ -95,33 +127,7 @@ const RegisterCompany = () => {
 
             setLoading(true)
 
-            if (formData?.companyName?.trim() === '') {
-                setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
-                setLoading(false)
-                return
-            }
-
-            if (formData?.formattedAddress?.trim() === '') {
-                setFormErrors({ ...formErrors, address: 'Location is required' })
-                setLoading(false)
-                return
-            }
-
-            if (formData?.whatsapp?.trim() === '') {
-                setFormErrors({ ...formErrors, whatsapp: 'WhatsApp number is required' })
-                setLoading(false)
-                return
-            }
-
-            //email is optional
-            if (formData?.email?.trim() !== '' && !formData?.email?.includes('@')) {
-                setFormErrors({ ...formErrors, email: 'Email is required and should contain a valid domain' })
-                setLoading(false)
-                return
-            }
-
-            //reset form Errors
-            setFormErrors({})
+            if (ValidateForm() === false) return
 
             await axios.post('api/companies/register', formData)
 
@@ -208,6 +214,35 @@ const RegisterCompany = () => {
                 </FormErrorMessage>
 
             </FormControl>
+
+            <FormControl
+                mb={3}
+                isRequired
+                isInvalid={typeof formErrors?.address !== 'undefined'}
+            >
+                <FormLabel>
+                    Address
+                </FormLabel>
+
+                <Autocomplete
+                    onLoad={handleLoad}
+                    onPlaceChanged={handlePlaceChanged}
+                >
+                    <Input
+                        id="address"
+                        type="text"
+                        placeholder="Oshodi ....."
+                        value={locationText}
+                        onChange={(e) => setLocationText(e.target.value)}
+                        autoComplete="off"
+                    />
+                </Autocomplete>
+                <FormErrorMessage>
+                    {formErrors?.address}
+                </FormErrorMessage>
+
+            </FormControl>
+
             <FormControl
                 mb={3}
                 isRequired

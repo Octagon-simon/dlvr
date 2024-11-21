@@ -30,6 +30,7 @@ export interface OrderDTO{
     whatsapp: string;
     orderLocation: GeoPoint;
     details: string;
+    companyId: string;
     assignedRiderId?: string;
     status: "pending" | "assigned" | "completed";
     createdAt: number;

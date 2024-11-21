@@ -16,14 +16,20 @@ interface CustomRequest extends Request {
 
 export async function POST(req: CustomRequest) {
     try {
-        const { orderLocation, details } = await req.json();
+        const { orderLocation, details, companyId } = await req.json();
 
-        if (!orderLocation || !details) {
+        if (!orderLocation || !details || !companyId) {
             return new Response(JSON.stringify({ error: 'Missing order details' }), { status: 400 });
         }
 
         const ridersRef = collection(db, 'dispatch_riders');
-        const snapshot = await getDocs(query(ridersRef, where('isAvailable', '==', true)));
+        const snapshot = await getDocs(
+            query(
+                ridersRef,
+                where("isAvailable", "==", true),
+                where("companyId", "==", companyId)
+            )
+        );
 
         if (snapshot.empty) {
             return new Response(JSON.stringify({ error: 'No available riders' }), { status: 404 });
