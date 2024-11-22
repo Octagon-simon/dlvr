@@ -2,7 +2,7 @@
 
 import { libraries } from "@/constants"
 import { CompanyDTO } from "@/types"
-import { Box, Button, FormErrorMessage, Input, useToast, FormControl, FormLabel, Text, } from "@chakra-ui/react"
+import { Box, Button, FormErrorMessage, Input, useToast, FormControl, FormLabel, Text, Spinner, } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
 import axios from "axios"
 import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
@@ -82,7 +82,7 @@ const RegisterCompany = () => {
         const trimmedFormData = Object.fromEntries(
             Object.entries(formData).map(([key, value]) => {
                 if (typeof value === 'string') {
-                    return [key, value.trim()]; 
+                    return [key, value.trim()];
                 }
                 return [key, value];
             })
@@ -123,11 +123,6 @@ const RegisterCompany = () => {
             setLocationText(locationObject.formatted_address || '')
         }
     }, [autocomplete, formData])
-
-
-    if (!isLoaded) {
-        return <div>Loading...</div>
-    }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         e.preventDefault()
@@ -196,34 +191,36 @@ const RegisterCompany = () => {
                 </FormErrorMessage>
             </FormControl>
 
-            <FormControl
-                mb={3}
-                isRequired
-                isInvalid={typeof formErrors?.address !== 'undefined'}
-            >
-                <FormLabel>
-                    Address
-                </FormLabel>
-
-                <Autocomplete
-                    onLoad={handleLoad}
-                    onPlaceChanged={handlePlaceChanged}
+            {(!isLoaded) ? <Spinner /> :
+                <FormControl
+                    mb={3}
+                    isRequired
+                    isInvalid={typeof formErrors?.address !== 'undefined'}
                 >
-                    <Input
-                        id="address"
-                        type="text"
-                        placeholder="Oshodi ....."
-                        value={locationText}
-                        onChange={(e) => setLocationText(e.target.value)}
-                        autoComplete="off"
-                    />
-                </Autocomplete>
-                <FormErrorMessage>
-                    {formErrors?.address}
-                </FormErrorMessage>
+                    <FormLabel>
+                        Address
+                    </FormLabel>
 
-            </FormControl>
+                    <Autocomplete
+                        onLoad={handleLoad}
+                        onPlaceChanged={handlePlaceChanged}
+                    >
+                        <Input
+                            id="address"
+                            type="text"
+                            placeholder="Oshodi ....."
+                            value={locationText}
+                            onChange={(e) => setLocationText(e.target.value)}
+                            autoComplete="off"
+                        />
+                    </Autocomplete>
+                    <FormErrorMessage>
+                        {formErrors?.address}
+                    </FormErrorMessage>
 
+                </FormControl>
+            }
+            
             <FormControl
                 mb={3}
                 isRequired
