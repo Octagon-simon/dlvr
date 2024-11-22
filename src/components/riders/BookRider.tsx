@@ -42,6 +42,7 @@ export const BookRider: React.FC<{
         message: ''
     })
     const [showResponse, setShowResponse] = useState(false)
+    const [orderSuccess, setOrderSuccess] = useState(false)
 
     const [formData, setFormData] = useState<Omit<OrderDTO, 'id' | 'createdAt'>>({
         status: 'pending',
@@ -151,7 +152,7 @@ export const BookRider: React.FC<{
         const trimmedFormData = Object.fromEntries(
             Object.entries(formData).map(([key, value]) => {
                 if (typeof value === 'string') {
-                    return [key, value.trim()]; 
+                    return [key, value.trim()];
                 }
                 return [key, value];
             })
@@ -191,7 +192,7 @@ export const BookRider: React.FC<{
                 message: string
             }
             setShowResponse(true)
-
+            setOrderSuccess(true)
             setResponse({
                 status: 'success',
                 message: `You have been assigned a new rider named ${rider?.name}, who is located at ${rider.formattedAddress}.`,
@@ -199,7 +200,7 @@ export const BookRider: React.FC<{
 
             setLoading(false)
 
-            // const s = {
+            // const sampleResponse = {
             //     "message": "Rider assigned successfully",
             //     "rider": {
             //         "id": "N1BIgHL5kKRrIvXQm7g7", "formattedAddress": "Victoria Island, Lagos 106104, Lagos, Nigeria",
@@ -217,7 +218,7 @@ export const BookRider: React.FC<{
             })
             setLoading(false)
         } catch (e) {
-            console.error("Error here", e)
+            // console.error("Error here", e)
             if (e instanceof AxiosError) {
                 setShowResponse(true)
                 setResponse({
@@ -249,12 +250,12 @@ export const BookRider: React.FC<{
             companyId: '',
             status: 'pending',
         });
-    
+
         setShowResponse(false);
         setLocationText('');
-        onClose(); 
+        onClose();
     };
-    
+
     return (
         (
             <Modal
@@ -377,10 +378,11 @@ export const BookRider: React.FC<{
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button disabled={loading} isLoading={loading} colorScheme='green' mr={3} onClick={handleContinue}>
+                        {(!orderSuccess) ? <Button disabled={loading} isLoading={loading} colorScheme='green' mr={3} onClick={handleContinue}>
                             Continue
-                        </Button>
-                        <Button onClick={handleClose}>Cancel</Button>
+                        </Button> : null}
+
+                        <Button onClick={handleClose}>{(orderSuccess) ? 'Okay' : 'Cancel'}</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

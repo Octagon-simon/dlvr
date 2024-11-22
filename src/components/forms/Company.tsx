@@ -227,34 +227,6 @@ const RegisterCompany = () => {
             <FormControl
                 mb={3}
                 isRequired
-                isInvalid={typeof formErrors?.address !== 'undefined'}
-            >
-                <FormLabel>
-                    Address
-                </FormLabel>
-
-                <Autocomplete
-                    onLoad={handleLoad}
-                    onPlaceChanged={handlePlaceChanged}
-                >
-                    <Input
-                        id="address"
-                        type="text"
-                        placeholder="Oshodi ....."
-                        value={locationText}
-                        onChange={(e) => setLocationText(e.target.value)}
-                        autoComplete="off"
-                    />
-                </Autocomplete>
-                <FormErrorMessage>
-                    {formErrors?.address}
-                </FormErrorMessage>
-
-            </FormControl>
-
-            <FormControl
-                mb={3}
-                isRequired
                 isInvalid={typeof formErrors?.whatsapp !== 'undefined'}
             >
                 <FormLabel>

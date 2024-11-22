@@ -32,7 +32,7 @@ export async function POST(req: CustomRequest) {
         );
 
         if (snapshot.empty) {
-            return new Response(JSON.stringify({ error: 'No available riders, please try again later' }), { status: 404 });
+            return new Response(JSON.stringify({ error: 'No available riders from this company, please try again later' }), { status: 404 });
         }
 
         const availableRiders = snapshot.docs.map(doc => ({
