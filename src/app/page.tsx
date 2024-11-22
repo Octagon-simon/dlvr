@@ -8,15 +8,27 @@ const LogisticsMap = dynamic(() => import('@/components/map/LogisticsMap'), { ss
 
 export default function Page() {
   return (
-    <Flex backgroundColor={"#ddd"} p={10} gap={10}>
-      <Box flex="1">
+    <Flex 
+      backgroundColor={"#ddd"} 
+      p={10} 
+      gap={10} 
+      direction={{ base: "column", md: "row" }}
+    >
+      <Box 
+        flex={{ base: "none", md: "1" }} 
+        mb={{ base: 4, md: 0 }}
+      >
         <RegistrationForm />
       </Box>
-      <Box flex="2">
-        <Box id="map" border="1px solid #bbb" p={5} backgroundColor={"#ccc"}>
-          <LogisticsMap />
-        </Box>
+      <Box 
+        flex={{ base: "none", md: "2" }} 
+        p={5} 
+        border="1px solid #bbb" 
+        backgroundColor={"#ccc"} 
+      >
+        <LogisticsMap />
       </Box>
     </Flex>
   );
 }
+
