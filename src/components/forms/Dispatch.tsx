@@ -179,7 +179,7 @@ const RegisterDispatch = () => {
                 </Box>
                 : null}
 
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register As a Disptach Rider</Text>
+            <Text fontWeight={"800"} fontSize={"xl"} mb={8}>Register Disptach Rider</Text>
 
             <FormControl
                 mb={3}

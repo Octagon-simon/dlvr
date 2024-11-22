@@ -59,12 +59,12 @@ export const BookRider: React.FC<{
 
     useEffect(() => {
         if (company?.id) {
-            setFormData({
-                ...formData,
+            setFormData((prev) => ({
+                ...prev,
                 companyId: company?.id
-            })
+            }))
         }
-    }, [company, formData])
+    }, [company])
 
     const [formErrors, setFormErrors] = useState<{
         name?: string,

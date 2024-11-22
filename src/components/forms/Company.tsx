@@ -174,7 +174,7 @@ const RegisterCompany = () => {
                 </Box>
                 : null}
 
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register As a Company</Text>
+            <Text fontWeight={"800"} fontSize={"xl"} mb={8}>Register Company</Text>
 
             <FormControl
                 mb={3}

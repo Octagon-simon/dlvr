@@ -42,7 +42,7 @@ export default function LogisticsMap() {
 
   useEffect(() => {
 
-    if(typeof window === "undefined") return
+    if (typeof window === "undefined") return
 
     if (!mapRef.current && !loadingCompanies && !loadingRiders && mapContainerRef.current && companies?.length > 0) {
 
@@ -73,6 +73,7 @@ export default function LogisticsMap() {
                 <FaEnvelope /> <Text>{company.email}</Text>
               </HStack>
               : null}
+            <Text fontSize='16px' mb={0} fontWeight={"800"}>Place Order</Text>
             <Button w={"full"} onClick={() => {
               setCurrentCompany(company);
               onOpen();
