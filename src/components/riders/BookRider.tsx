@@ -57,15 +57,6 @@ export const BookRider: React.FC<{
         whatsapp: ''
     })
 
-    useEffect(() => {
-        if (company?.id) {
-            setFormData((prev) => ({
-                ...prev,
-                companyId: company?.id
-            }))
-        }
-    }, [company])
-
     const [formErrors, setFormErrors] = useState<{
         name?: string,
         whatsapp?: string,
@@ -172,7 +163,12 @@ export const BookRider: React.FC<{
 
             setLoading(true)
 
-            if (formData?.companyId?.trim() === '') {
+            if (company?.id) {
+                setFormData((prev) => ({
+                    ...prev,
+                    companyId: company?.id
+                }))
+            } else {
                 toast({
                     title: "Error",
                     description: "Company ID is required",
@@ -182,6 +178,8 @@ export const BookRider: React.FC<{
                 setLoading(false)
                 return
             }
+
+            setLoading(true)
 
             if (ValidateForm() === false) return
 
@@ -252,6 +250,7 @@ export const BookRider: React.FC<{
         });
 
         setShowResponse(false);
+        setOrderSuccess(false);
         setLocationText('');
         onClose();
     };
