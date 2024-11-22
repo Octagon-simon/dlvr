@@ -163,12 +163,7 @@ export const BookRider: React.FC<{
 
             setLoading(true)
 
-            if (company?.id) {
-                setFormData((prev) => ({
-                    ...prev,
-                    companyId: company?.id
-                }))
-            } else {
+            if (!company?.id) {
                 toast({
                     title: "Error",
                     description: "Company ID is required",
@@ -183,7 +178,10 @@ export const BookRider: React.FC<{
 
             if (ValidateForm() === false) return
 
-            const response = await axios.post('api/dispatch-riders/order', formData)
+            const response = await axios.post('api/dispatch-riders/order', {
+                ...formData,
+                companyId: company.id,
+            })
 
             const { rider } = response.data as {
                 rider: DispatchRiderDTO,
