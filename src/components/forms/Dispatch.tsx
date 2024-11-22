@@ -125,9 +125,9 @@ const RegisterDispatch = () => {
         const trimmedFormData = Object.fromEntries(
             Object.entries(formData).map(([key, value]) => {
                 if (typeof value === 'string') {
-                    return [key, value.trim()]; 
+                    return [key, value.trim()];
                 }
-                return [key, value]; 
+                return [key, value];
             })
         );
 
@@ -179,7 +179,7 @@ const RegisterDispatch = () => {
                 </Box>
                 : null}
 
-            <Text fontWeight={"800"} fontSize={"2xl"} mb={8}>Register As a Disptach Rider</Text>
+            <Text fontWeight={"800"} fontSize={"xl"} mb={8}>Register Disptach Rider</Text>
 
             <FormControl
                 mb={3}
@@ -246,34 +246,35 @@ const RegisterDispatch = () => {
                     </Select>
                 </FormControl>
             }
-
-            <FormControl
-                mb={8}
-                isRequired
-                isInvalid={typeof formErrors?.address !== 'undefined'}
-            >
-                <FormLabel>
-                    Address
-                </FormLabel>
-
-                <Autocomplete
-                    onLoad={handleLoad}
-                    onPlaceChanged={handlePlaceChanged}
+            {(!isLoaded) ? <Spinner /> :
+                <FormControl
+                    mb={8}
+                    isRequired
+                    isInvalid={typeof formErrors?.address !== 'undefined'}
                 >
-                    <Input
-                        id="address"
-                        type="text"
-                        placeholder="Oshodi ....."
-                        value={locationText}
-                        onChange={(e) => setLocationText(e.target.value)}
-                        autoComplete="off"
-                    />
-                </Autocomplete>
-                <FormErrorMessage>
-                    {formErrors?.address}
-                </FormErrorMessage>
+                    <FormLabel>
+                        Address
+                    </FormLabel>
 
-            </FormControl>
+                    <Autocomplete
+                        onLoad={handleLoad}
+                        onPlaceChanged={handlePlaceChanged}
+                    >
+                        <Input
+                            id="address"
+                            type="text"
+                            placeholder="Oshodi ....."
+                            value={locationText}
+                            onChange={(e) => setLocationText(e.target.value)}
+                            autoComplete="off"
+                        />
+                    </Autocomplete>
+                    <FormErrorMessage>
+                        {formErrors?.address}
+                    </FormErrorMessage>
+
+                </FormControl>
+            }
 
             <Button isLoading={loading} disabled={loading} onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
         </Box>

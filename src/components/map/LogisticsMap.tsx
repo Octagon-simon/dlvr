@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Box, Button, HStack, Text, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, HStack, Spinner, Text, useDisclosure } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 import { FaEnvelope, FaMapPin } from 'react-icons/fa6';
 import { BsBicycle, BsFillPhoneFill, BsHouse } from 'react-icons/bs';
@@ -34,6 +34,7 @@ export default function LogisticsMap() {
   const { loading: loadingRiders, riders } = useRiders()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [currentCompany, setCurrentCompany] = useState<CompanyDTO>()
+  const [loading, setLoading] = useState(true)
 
   const getCompanyName = useCallback((companyId: string) =>
     companies?.find((company) => company.id === companyId)?.companyName || "Unknown company",
@@ -42,9 +43,10 @@ export default function LogisticsMap() {
 
   useEffect(() => {
 
-    if(typeof window === "undefined") return
+    if (typeof window === "undefined") return
 
     if (!mapRef.current && !loadingCompanies && !loadingRiders && mapContainerRef.current && companies?.length > 0) {
+      setLoading(false)
 
       mapRef.current = L.map(mapContainerRef.current).setView([companies[0]?.location?.lat, companies[0]?.location?.lng], 5);
 
@@ -73,6 +75,7 @@ export default function LogisticsMap() {
                 <FaEnvelope /> <Text>{company.email}</Text>
               </HStack>
               : null}
+            <Text fontSize='16px' mb={0} fontWeight={"800"}>Place Order</Text>
             <Button w={"full"} onClick={() => {
               setCurrentCompany(company);
               onOpen();
@@ -123,6 +126,7 @@ export default function LogisticsMap() {
 
   return (
     <>
+      {(loading) ? <Spinner /> : null}
       <div suppressHydrationWarning={true} ref={mapContainerRef} style={{ height: '100vh', width: '100%' }} />
       <BookRider company={currentCompany} isOpen={isOpen} onClose={onClose} />
     </>
