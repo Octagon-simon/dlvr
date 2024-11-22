@@ -64,7 +64,7 @@ export const BookRider: React.FC<{
                 companyId: company?.id
             })
         }
-    }, [company])
+    }, [company, formData])
 
     const [formErrors, setFormErrors] = useState<{
         name?: string,
@@ -121,7 +121,7 @@ export const BookRider: React.FC<{
         setFormData({ ...formData, [e.currentTarget.id]: e.currentTarget.value })
     }
 
-    const ValidateForm = (): Boolean => {
+    const ValidateForm = (): boolean => {
         if (formData?.name?.trim() === '') {
             setFormErrors({ ...formErrors, name: 'Your Name is required' })
             setLoading(false)
@@ -187,7 +187,7 @@ export const BookRider: React.FC<{
 
             const response = await axios.post('api/dispatch-riders/order', formData)
 
-            const { rider, message } = response.data as {
+            const { rider } = response.data as {
                 rider: DispatchRiderDTO,
                 message: string
             }

@@ -93,7 +93,7 @@ const RegisterDispatch = () => {
         setFormData({ ...formData, [e.currentTarget.id]: e.currentTarget.value })
     }
 
-    const validateForm = (): Boolean => {
+    const validateForm = (): boolean => {
 
         if (formData?.name?.trim() === '') {
             setFormErrors({ ...formErrors, name: 'Your Name is required' })

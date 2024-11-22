@@ -50,7 +50,7 @@ const RegisterCompany = () => {
         [],
     )
 
-    const ValidateForm = (): Boolean => {
+    const ValidateForm = (): boolean => {
         if (formData?.companyName?.trim() === '') {
             setFormErrors({ ...formErrors, companyName: 'Company Name is required' })
             setLoading(false)
