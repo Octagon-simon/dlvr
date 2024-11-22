@@ -28,7 +28,7 @@ export interface OrderDTO{
     id: string;
     name: string;
     whatsapp: string;
-    orderLocation: GeoPoint;
+    pickupAddress: GeoPoint;
     details: string;
     companyId: string;
     assignedRiderId?: string;

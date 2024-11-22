@@ -1,4 +1,4 @@
-import RegisterDispatch from '@/components/forms/RegisterDispatch';
+import RegisterDispatch from '@/components/forms/Dispatch';
 import LogisticsMap from '@/components/map/LogisticsMap';
 import { Box, Flex } from '@chakra-ui/react';
 

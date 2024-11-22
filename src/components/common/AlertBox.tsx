@@ -1,8 +1,10 @@
 import { AlertTitle, Alert, AlertDescription, AlertIcon, useDisclosure, CloseButton, Box, } from "@chakra-ui/react"
 
 const AlertBox: React.FC<{
-    message: string
-}> = ({ message }) => {
+    message: string;
+    status: 'success' | 'error' | 'warning' | 'info';
+    showCloseButton?: boolean
+}> = ({ message, status, showCloseButton = true }) => {
 
     const {
         onClose,
@@ -11,21 +13,21 @@ const AlertBox: React.FC<{
 
     return (
         isOpen ? (
-            <Alert status='info'>
+            <Alert status={status}>
                 <AlertIcon />
                 <Box>
-                    <AlertTitle>Success!</AlertTitle>
+                    {/* <AlertTitle>Success!</AlertTitle> */}
                     <AlertDescription>
                         {message}
                     </AlertDescription>
                 </Box>
-                <CloseButton
+                {(showCloseButton) ? <CloseButton
                     alignSelf='flex-start'
                     position='relative'
                     right={-1}
                     top={-1}
                     onClick={onClose}
-                />
+                /> : null}
             </Alert>
         ) : null
     )

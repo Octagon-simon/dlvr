@@ -2,7 +2,7 @@
 
 import { libraries } from "@/constants"
 import { CompanyDTO } from "@/types"
-import { Box, Button, Flex, FormErrorMessage, Input, Link, useToast, FormControl, FormLabel, Text, } from "@chakra-ui/react"
+import { Box, Button, FormErrorMessage, Input, useToast, FormControl, FormLabel, Text, } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
 import axios from "axios"
 import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
@@ -12,10 +12,10 @@ const GOOGLE_PLACES_API_KEY: string | undefined =
     process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
 
 const RegisterCompany = () => {
-
     const toast = useToast()
 
     const [locationText, setLocationText] = useState("")
+
     const [loading, setLoading] = useState(false)
     const [hasRegistered, setHasRegistered] = useState(false)
     const [formData, setFormData] = useState<Omit<CompanyDTO, 'id' | 'createdAt'>>({
@@ -79,6 +79,20 @@ const RegisterCompany = () => {
         //reset form Errors
         setFormErrors({})
 
+        const trimmedFormData = Object.fromEntries(
+            Object.entries(formData).map(([key, value]) => {
+                if (typeof value === 'string') {
+                    return [key, value.trim()]; 
+                }
+                return [key, value];
+            })
+        );
+
+        setFormData((prev) => ({
+            ...prev,
+            ...trimmedFormData
+        }))
+
         return true
     }
 
@@ -121,13 +135,13 @@ const RegisterCompany = () => {
         setFormData({ ...formData, [e.currentTarget.id]: e.currentTarget.value })
     }
 
-    const handleContinue = async (e: FormEvent) => {
+    const handleContinue = async (e: FormEvent): Promise<void> => {
         try {
             e.preventDefault()
 
-            setLoading(true)
-
             if (ValidateForm() === false) return
+
+            setLoading(true)
 
             await axios.post('api/companies/register', formData)
 
@@ -153,15 +167,10 @@ const RegisterCompany = () => {
     }
 
     return (
-        <Box
-            border={"1px solid #bbb"}
-            backgroundColor={'#fff'}
-            p={10}
-            minHeight={"100%"}
-        >
+        <Box>
             {(hasRegistered) ?
                 <Box mb={5}>
-                    <AlertBox message="Registration Successful! Please refresh this page to get an updated map" />
+                    <AlertBox status="success" message="Registration Successful! Please refresh this page to get an updated map" />
                 </Box>
                 : null}
 
@@ -281,12 +290,6 @@ const RegisterCompany = () => {
             </FormControl>
 
             <Button isLoading={loading} disabled={loading} onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
-            <Flex flexDir={"column"} mt={5}>
-                <Text>You&apos;re registering as a Logistics company. </Text>
-                <Link color={"blue"} href="/dispatch-rider">
-                    Click here to register as a dispatch rider instead
-                </Link>
-            </Flex>
         </Box>
     )
 }
