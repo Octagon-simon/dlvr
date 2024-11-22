@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, ChangeEvent, FormEvent, useEffect } from 'react';
+import React, { useState, useCallback, ChangeEvent, FormEvent } from 'react';
 import {
     Button, Modal, ModalContent, ModalHeader, ModalOverlay,
     ModalCloseButton, ModalBody, ModalFooter, FormControl, FormErrorMessage,
