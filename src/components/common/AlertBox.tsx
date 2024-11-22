@@ -1,4 +1,4 @@
-import { AlertTitle, Alert, AlertDescription, AlertIcon, useDisclosure, CloseButton, Box, } from "@chakra-ui/react"
+import { Alert, AlertDescription, AlertIcon, useDisclosure, CloseButton, Box, } from "@chakra-ui/react"
 
 const AlertBox: React.FC<{
     message: string;

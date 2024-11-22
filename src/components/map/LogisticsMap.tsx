@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Box, Button, HStack, Text, useDisclosure } from '@chakra-ui/react';
@@ -35,9 +35,14 @@ export default function LogisticsMap() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [currentCompany, setCurrentCompany] = useState<CompanyDTO>()
 
-  const getCompanyName = (companyId: string) => companies?.find((company) => company.id === companyId)?.companyName || "Unknown company"
+  const getCompanyName = useCallback((companyId: string) =>
+    companies?.find((company) => company.id === companyId)?.companyName || "Unknown company",
+    [companies]
+  );
 
   useEffect(() => {
+
+    if(typeof window === "undefined") return
 
     if (!mapRef.current && !loadingCompanies && !loadingRiders && mapContainerRef.current && companies?.length > 0) {
 
@@ -114,7 +119,7 @@ export default function LogisticsMap() {
         mapRef.current = null;
       }
     };
-  }, [companies, loadingCompanies, loadingRiders]);
+  }, [companies, loadingCompanies, loadingRiders, riders, onOpen, getCompanyName]);
 
   return (
     <>

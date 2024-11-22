@@ -1,10 +1,12 @@
+'use client';
 
+import dynamic from 'next/dynamic';
 import RegistrationForm from '@/components/forms';
-import LogisticsMap from '@/components/map/LogisticsMap';
 import { Box, Flex } from '@chakra-ui/react';
 
-export default function Page() {
+const LogisticsMap = dynamic(() => import('@/components/map/LogisticsMap'), { ssr: false });
 
+export default function Page() {
   return (
     <Flex backgroundColor={"#ddd"} p={10} gap={10}>
       <Box flex="1">
@@ -16,6 +18,5 @@ export default function Page() {
         </Box>
       </Box>
     </Flex>
-
-  )
+  );
 }
