@@ -7,7 +7,7 @@ interface CustomRequest extends Request {
     json(): Promise<OrderDTO>;
 }
 // id: string;
-// orderLocation: GeoPoint;
+// pickupAddress: GeoPoint;
 // details: string;
 // assignedRiderId?: string;
 // status: "pending" | "assigned" | "completed";
@@ -16,9 +16,9 @@ interface CustomRequest extends Request {
 
 export async function POST(req: CustomRequest) {
     try {
-        const { orderLocation, details, companyId } = await req.json();
+        const { pickupAddress, details, companyId } = await req.json();
 
-        if (!orderLocation || !details || !companyId) {
+        if (!pickupAddress || !details || !companyId) {
             return new Response(JSON.stringify({ error: 'Missing order details' }), { status: 400 });
         }
 
@@ -32,7 +32,7 @@ export async function POST(req: CustomRequest) {
         );
 
         if (snapshot.empty) {
-            return new Response(JSON.stringify({ error: 'No available riders' }), { status: 404 });
+            return new Response(JSON.stringify({ error: 'No available riders, please try again later' }), { status: 404 });
         }
 
         const availableRiders = snapshot.docs.map(doc => ({
@@ -42,11 +42,11 @@ export async function POST(req: CustomRequest) {
 
         const nearestRider = availableRiders.reduce((prev, curr) => {
             const prevDistance = distanceBetween(
-                [orderLocation.lat, orderLocation.lng],
+                [pickupAddress.lat, pickupAddress.lng],
                 [prev.location.lat, prev.location.lng]
             );
             const currDistance = distanceBetween(
-                [orderLocation.lat, orderLocation.lng],
+                [pickupAddress.lat, pickupAddress.lng],
                 [curr.location.lat, curr.location.lng]
             );
             return currDistance < prevDistance ? curr : prev;
@@ -55,7 +55,7 @@ export async function POST(req: CustomRequest) {
         // Assign the rider to the order
         const ordersRef = collection(db, 'orders');
         await addDoc(ordersRef, {
-            orderLocation: new GeoPoint(orderLocation.lat, orderLocation.lng),
+            pickupAddress: new GeoPoint(pickupAddress.lat, pickupAddress.lng),
             details,
             assignedRiderId: nearestRider.id,
             status: 'assigned',

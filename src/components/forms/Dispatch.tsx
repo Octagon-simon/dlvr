@@ -2,7 +2,7 @@
 
 import { libraries } from "@/constants"
 import { DispatchRiderDTO } from "@/types"
-import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Link, Select, Spinner, Text, useToast, } from "@chakra-ui/react"
+import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Select, Spinner, Text, useToast, } from "@chakra-ui/react"
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api"
 import axios from "axios"
 import React, { ChangeEvent, FormEvent, useCallback, useState } from "react"
@@ -93,38 +93,59 @@ const RegisterDispatch = () => {
         setFormData({ ...formData, [e.currentTarget.id]: e.currentTarget.value })
     }
 
-    const handleContinue = async (e: FormEvent) => {
+    const validateForm = (): Boolean => {
+
+        if (formData?.name?.trim() === '') {
+            setFormErrors({ ...formErrors, name: 'Your Name is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.companyId?.trim() === '') {
+            setFormErrors({ ...formErrors, companyId: 'Company Name is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.formattedAddress?.trim() === '') {
+            setFormErrors({ ...formErrors, address: 'Location is required' })
+            setLoading(false)
+            return false
+        }
+
+        if (formData?.whatsapp?.trim() === '') {
+            setFormErrors({ ...formErrors, whatsapp: 'Your whatsapp number is required' })
+            setLoading(false)
+            return false
+        }
+
+        //reset form Errors
+        setFormErrors({})
+
+        const trimmedFormData = Object.fromEntries(
+            Object.entries(formData).map(([key, value]) => {
+                if (typeof value === 'string') {
+                    return [key, value.trim()]; 
+                }
+                return [key, value]; 
+            })
+        );
+
+        setFormData((prev) => ({
+            ...prev,
+            ...trimmedFormData
+        }))
+
+        return true;
+    }
+
+    const handleContinue = async (e: FormEvent): Promise<void> => {
         try {
             e.preventDefault()
 
+            if (validateForm() === false) return
+
             setLoading(true)
-
-            if (formData?.name?.trim() === '') {
-                setFormErrors({ ...formErrors, name: 'Your Name is required' })
-                setLoading(false)
-                return
-            }
-
-            if (formData?.companyId?.trim() === '') {
-                setFormErrors({ ...formErrors, companyId: 'Company Name is required' })
-                setLoading(false)
-                return
-            }
-
-            if (formData?.formattedAddress?.trim() === '') {
-                setFormErrors({ ...formErrors, address: 'Location is required' })
-                setLoading(false)
-                return
-            }
-
-            if (formData?.whatsapp?.trim() === '') {
-                setFormErrors({ ...formErrors, whatsapp: 'Your whatsapp number is required' })
-                setLoading(false)
-                return
-            }
-
-            //reset form Errors
-            setFormErrors({})
 
             await axios.post('api/dispatch-riders/register', formData)
 
@@ -151,14 +172,10 @@ const RegisterDispatch = () => {
 
     return (
         <Box
-            border={"1px solid #bbb"}
-            backgroundColor={'#fff'}
-            p={10}
-            minHeight={"100%"}
         >
             {(hasRegistered) ?
                 <Box mb={5}>
-                    <AlertBox message="Registration Successful! Please refresh this page to get an updated map" />
+                    <AlertBox status={"success"} message="Registration Successful! Please refresh this page to get an updated map" />
                 </Box>
                 : null}
 
@@ -194,7 +211,7 @@ const RegisterDispatch = () => {
                     Your Whatsapp Number
                 </FormLabel>
                 <Input
-                    id="name"
+                    id="whatsapp"
                     onChange={handleChange}
                     value={formData?.whatsapp}
                     placeholder="081xxxxxxxx"
@@ -209,7 +226,6 @@ const RegisterDispatch = () => {
                     mb={3}
                     isRequired
                     isInvalid={typeof formErrors?.companyId !== 'undefined'}
-
                 >
                     <FormLabel requiredIndicator={null} htmlFor="payment_type">
                         Select company
@@ -232,7 +248,7 @@ const RegisterDispatch = () => {
             }
 
             <FormControl
-                mb={3}
+                mb={8}
                 isRequired
                 isInvalid={typeof formErrors?.address !== 'undefined'}
             >
@@ -260,12 +276,6 @@ const RegisterDispatch = () => {
             </FormControl>
 
             <Button isLoading={loading} disabled={loading} onClick={handleContinue} colorScheme='blue' w="full"> Register </Button>
-            <Flex flexDir={"column"} mt={5}>
-                <Text>You&apos;re registering as a Disptach Rider. </Text>
-                <Link color={"blue"} href="/">
-                    Click here to register as a Logistics Company instead
-                </Link>
-            </Flex>
         </Box>
     )
 }
